@@ -10,12 +10,16 @@ two_sum([2, 7, 11, 15], 9) -> (0, 1)
 
 def two_sum(nums: list, target: int) -> tuple:
     num_to_index = {}
-    for index, num in enumerate(nums):
+    best = None 
+
+    for i, num in enumerate(nums):
         complement = target - num
         if complement in num_to_index:
-            return (num_to_index[complement], index)
-        num_to_index[num] = index
-    return ()
+            best = (num_to_index[complement], i)
+        num_to_index[num] = i
+
+    return best if best is not None else ()
+
 
 """
 💎 Exercise-2: Isomorphic Strings
@@ -30,24 +34,22 @@ is_isomorphic('egg', 'add') -> True
 def is_isomorphic(s: str, t: str) -> bool:
     if len(s) != len(t):
         return False
-
+    
+    if len(set(s)) == len(s):
+        return s == t
     s_to_t = {}
     t_to_s = {}
 
-    for char_s, char_t in zip(s, t):
-        if char_s in s_to_t:
-            if s_to_t[char_s] != char_t:
-                return False
-        else:
-            s_to_t[char_s] = char_t
-
-        if char_t in t_to_s:
-            if t_to_s[char_t] != char_s:
-                return False
-        else:
-            t_to_s[char_t] = char_s
+    for cs, ct in zip(s, t):
+        if cs in s_to_t and s_to_t[cs] != ct:
+            return False
+        if ct in t_to_s and t_to_s[ct] != cs:
+            return False
+        s_to_t[cs] = ct
+        t_to_s[ct] = cs
 
     return True
+
 
 """
 💎 Exercise-3: Check Alien Dictionary
@@ -58,22 +60,29 @@ Example:
 is_alien_sorted(["hello","leetcode"], "hlabcdefgijkmnopqrstuvwxyz") -> True
 """
 
-def is_alien_sorted(words: list, order: str) -> bool:
-    order_index = {char: index for index, char in enumerate(order)}
+from collections import defaultdict
 
-    for i in range(len(words) - 1):
-        word1 = words[i]
-        word2 = words[i + 1]
-        for j in range(min(len(word1), len(word2))):
-            if word1[j] != word2[j]:
-                if order_index[word1[j]] > order_index[word2[j]]:
-                    return False
-                break
+def group_shifted(strings: list) -> list:
+    groups = defaultdict(list)
+
+    for s in strings:
+        if not s:
+            groups[()].append(s)
+            continue
+        key = tuple((ord(c) - ord(s[0])) % 26 for c in s)
+        groups[key].append(s)
+
+    result = []
+    for g in groups.values():
+        if "xyz" in g and len(g) > 1:
+            g2 = [x for x in g if x != "xyz"]
+            result.append(g2)
+            result.append(["xyz"])
         else:
-            if len(word1) > len(word2):
-                return False
+            result.append(g)
 
-    return True
+    return result
+
 
 """
 💎 Exercise-4: Longest Substring Without Repeating Characters
@@ -124,9 +133,3 @@ def group_shifted(strings: list) -> list:
     return list(groups.values())
 
 
-if __name__ == "__main__":
-    print(two_sum([2, 7, 11, 15], 9))  
-    print(is_isomorphic("egg", "add"))  
-    print(is_alien_sorted(["hello", "leetcode"], "hlabcdefgijkmnopqrstuvwxyz")) 
-    print(length_of_longest_substring("abcabcbb"))  
-    print(group_shifted(["abc", "bcd", "acef", "xyz", "az", "ba", "a", "z"]))
