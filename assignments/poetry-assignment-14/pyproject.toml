@@ -2,7 +2,6 @@
 name = "poetry-assignment-14"
 version = "0.1.0"
 description = ""
-authors = ["Shakh <makhkambayev.s04@gmail.com>"]
 package-mode = false
 
 [tool.poetry.dependencies]
