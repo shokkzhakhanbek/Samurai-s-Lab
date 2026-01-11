@@ -1,46 +1,106 @@
-from typing import List, Any, Dict, Set, Generator
+from typing import List, Any, Dict, Set, Generator, Optional
 
 class StaticArray:
     def __init__(self, capacity: int):
         """
         Initialize a static array of a given capacity.
         """
+        if capacity <= 0:
+            raise ValueError("capacity  positive")
+        self.capacity = capacity
+        self._data: List[Optional[int]] = [None] * capacity
+
+    def _check_index(self, index: int) -> None:
+        if index < 0 or index >= self.capacity:
+            raise IndexError("index out of range")
 
     def set(self, index: int, value: int) -> None:
         """
         Set the value at a particular index.
         """
+        self._check_index(index)
+        self._data[index] = value
 
     def get(self, index: int) -> int:
         """
         Retrieve the value at a particular index.
         """
+        self._check_index(index)
+        val = self._data[index]
+        if val is None:
+            raise ValueError("no value set at this index")
+        return val
+
 
 class DynamicArray:
     def __init__(self):
         """
         Initialize an empty dynamic array.
         """
+        self._capacity = 2
+        self._size = 0
+        self._data: List[Optional[int]] = [None] * self._capacity
+
+    def __len__(self) -> int:
+        return self._size
+
+    def _resize(self, new_capacity: int) -> None:
+        new_data: List[Optional[int]] = [None] * new_capacity
+        for i in range(self._size):
+            new_data[i] = self._data[i]
+        self._data = new_data
+        self._capacity = new_capacity
+
+    def _check_index(self, index: int) -> None:
+        if index < 0 or index >= self._size:
+            raise IndexError("index out of range")
 
     def append(self, value: int) -> None:
         """
         Add a value to the end of the dynamic array.
         """
+        if self._size == self._capacity:
+            self._resize(self._capacity * 2)
+        self._data[self._size] = value
+        self._size += 1
 
     def insert(self, index: int, value: int) -> None:
         """
         Insert a value at a particular index.
         """
+        if index < 0 or index > self._size:
+            raise IndexError("index out of range")
+
+        if self._size == self._capacity:
+            self._resize(self._capacity * 2)
+
+        for i in range(self._size, index, -1):
+            self._data[i] = self._data[i - 1]
+        self._data[index] = value
+        self._size += 1
 
     def delete(self, index: int) -> None:
         """
         Delete the value at a particular index.
         """
+        self._check_index(index)
+        for i in range(index, self._size - 1):
+            self._data[i] = self._data[i + 1]
+        self._data[self._size - 1] = None
+        self._size -= 1
+        if self._size > 0 and self._size <= self._capacity // 4 and self._capacity > 2:
+            self._resize(max(2, self._capacity // 2))
 
     def get(self, index: int) -> int:
         """
         Retrieve the value at a particular index.
         """
+        self._check_index(index)
+        val = self._data[index]
+        if val is None:
+            raise ValueError("unexpected empty value")
+        return val
+
 
 class Node:
     def __init__(self, value: int):
